@@ -19,10 +19,10 @@
 class Robot : public frc::TimedRobot
 {
 private:
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left1 {1};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left2 {2};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right1 {3};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right2 {4};
+  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left1 {5};
+  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left2 {6};
+  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right1 {7};
+  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right2 {8};
 
   frc::SpeedControllerGroup m_left { m_left1, m_left2 };
   frc::SpeedControllerGroup m_right { m_right1, m_right2 };
