@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 
 #include <hal/cpp/fpga_clock.h>
 
@@ -18,15 +19,16 @@ void Robot::RobotInit()
   m_jsc.SetExponent(3.0);
 
   int i;
-  for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good() && i < 25; i++);
-  if (i >= 25) {
+  for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good() && i < kMaxFiles; i++);
+  if (i >= kMaxFiles) {
     i = 0;
-    m_csvName = m_csvName + std::to_string(i) + ".csv";
     std::ofstream ofs;
-    ofs.open(m_csvName, std::ofstream::out | std::ofstream::trunc);
+    ofs.open(m_csvName + std::to_string(i) + ".csv", std::ofstream::out | std::ofstream::trunc);
     ofs.close();
-  } else {
-    m_csvName = m_csvName + std::to_string(i) + ".csv";
+  }
+  m_csvName = m_csvName + std::to_string(i) + ".csv";
+  if (std::ifstream{m_csvName + std::to_string(i+1) + ".csv"}.good()) {
+    remove((m_csvName + std::to_string(i+1) + ".csv").c_str());
   }
 }
 

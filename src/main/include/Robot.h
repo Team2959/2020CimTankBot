@@ -25,6 +25,7 @@ private:
   frc::Joystick m_driverJoystickRight {1};
 
   cwtech::UniformConditioning m_jsc;
+  const int kMaxFiles = 5;
   const std::string kCSVHeader = "Time,Pose2d::X, Pose2d::Y, Pose2d::Rot";
   std::string m_csvName = "/home/lvuser/pose_";
   bool m_headerWritten = false;
