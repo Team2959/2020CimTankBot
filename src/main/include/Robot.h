@@ -8,32 +8,31 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <tuple>
 
 #include <frc/TimedRobot.h>
-#include <ctre/phoenix/motorcontrol/can/WPI_TalonSRX.h>
-#include <frc/SpeedControllerGroup.h>
-#include <frc/Drive/DifferentialDrive.h>
 #include <frc/Joystick.h>
+
+#include <Drivetrain.h>
+
 #include <Conditioning.h>
 
 class Robot : public frc::TimedRobot
 {
 private:
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left1 {5};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_left2 {6};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right1 {7};
-  ctre::phoenix::motorcontrol::can::WPI_TalonSRX m_right2 {8};
-
-  frc::SpeedControllerGroup m_left { m_left1, m_left2 };
-  frc::SpeedControllerGroup m_right { m_right1, m_right2 };
-
-  frc::DifferentialDrive m_tankDrive { m_left, m_right };
-
   frc::Joystick m_driverJoystickLeft {0};
   frc::Joystick m_driverJoystickRight {1};
 
   cwtech::UniformConditioning m_jsc;
+  const std::string kCSVHeader = "Time,Pose2d::X, Pose2d::Y, Pose2d::Rot";
+  std::string m_csvName = "/home/lvuser/pose_";
+  bool m_headerWritten = false;
+  std::vector<std::tuple<int64_t, units::meter_t, units::meter_t, units::degree_t>> m_pose;
 
+  Drivetrain m_drivetrain;
+
+  void WritePoseToCSV();
 public:
   void RobotInit() override;
   void RobotPeriodic() override;
