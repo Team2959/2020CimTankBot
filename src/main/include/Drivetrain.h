@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <tuple>
+
 #include <frc/Encoder.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
@@ -41,10 +43,14 @@ private:
 
   frc::DifferentialDrive m_tankDrive { m_left, m_right };
 
+  double m_leftSpeed = 0;
+  double m_rightSpeed = 0;
+
 public:
   Drivetrain();
   frc::Rotation2d GetAngle();
   const frc::Pose2d& UpdateOdometry();
   frc::Pose2d GetPose();
   void SetSpeeds(double leftSpeed, double rightSpeed);
+  std::tuple<double, double> GetInputs();
 };

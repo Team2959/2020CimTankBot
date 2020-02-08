@@ -42,11 +42,14 @@ void Robot::RobotInit()
  */
 void Robot::RobotPeriodic() {
   frc::Pose2d pose = m_drivetrain.UpdateOdometry();
+  auto inputs = m_drivetrain.GetInputs();
   m_pose.push_back(std::make_tuple(
     std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count(),
     pose.Translation().X(),
     pose.Translation().Y(),
-    pose.Rotation().Degrees()
+    pose.Rotation().Degrees(),
+    std::get<0>(inputs),
+    std::get<1>(inputs)
   ));
 
   if (m_pose.size() >= 100) WritePoseToCSV();
@@ -94,7 +97,9 @@ void Robot::WritePoseToCSV() {
     stream << std::to_string(std::get<0>(tuple)) << ","
       << std::to_string(double(std::get<1>(tuple))) << ","
       << std::to_string(double(std::get<2>(tuple))) << ","
-      << std::to_string(double(std::get<3>(tuple))) << "\n";
+      << std::to_string(double(std::get<3>(tuple))) << ","
+      << std::to_string(double(std::get<4>(tuple))) << "\n"
+      << std::to_string(double(std::get<5>(tuple))) << "\n";
   }
 
   stream.close();

@@ -30,5 +30,11 @@ frc::Pose2d Drivetrain::GetPose() {
 
 void Drivetrain::SetSpeeds(double leftSpeed, double rightSpeed) {
     m_tankDrive.TankDrive(leftSpeed, rightSpeed);
+    m_leftSpeed = leftSpeed;
+    m_rightSpeed = rightSpeed;
+}
+
+std::tuple<double, double> Drivetrain::GetInputs() {
+    return std::make_tuple(m_leftSpeed, m_rightSpeed);
 }
 
