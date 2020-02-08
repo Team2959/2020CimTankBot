@@ -24,7 +24,12 @@ private:
   frc::Joystick m_driverJoystickLeft {0};
   frc::Joystick m_driverJoystickRight {1};
 
-  cwtech::UniformConditioning m_jsc;
+  cwtech::UniformConditioning m_jscLeft;
+  cwtech::UniformConditioning m_jscRight;
+  const double kDefaultOutputOffset = 0.1;
+  const double kDefaultDeadband = 0.05;
+  const double kDefaultExponent = 3.0;
+
   const int kMaxFiles = 5;
   const std::string kCSVHeader = "Time,Pose2d::X,Pose2d::Y,Pose2d::Heading,Inputs::Left,Inputs::Right";
   std::string m_csvName = "/home/lvuser/pose_";

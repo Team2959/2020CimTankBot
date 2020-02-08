@@ -16,11 +16,24 @@
 
 void Robot::RobotInit()
 {
-  m_jsc.SetRange(0.05, 1.0);
-  m_jsc.SetExponent(3.0);
+  m_jscLeft.SetRange(kDefaultOutputOffset, 1.0);
+  m_jscLeft.SetDeadband(kDefaultDeadband);
+  m_jscLeft.SetExponent(kDefaultExponent);
+
+  m_jscRight.SetRange(kDefaultOutputOffset, 1.0);
+  m_jscRight.SetDeadband(kDefaultDeadband);
+  m_jscRight.SetExponent(kDefaultExponent);
 
   frc::SmartDashboard::PutBoolean("Enable Logging", m_logData);
   frc::SmartDashboard::PutString("Driver Name", m_driverName);
+
+  frc::SmartDashboard::PutBoolean("Update Conditioning", false);
+  frc::SmartDashboard::PutNumber("Left Output Offset", kDefaultOutputOffset);
+  frc::SmartDashboard::PutNumber("Left Deadband", kDefaultDeadband);
+  frc::SmartDashboard::PutNumber("Left Exponent", kDefaultExponent);
+  frc::SmartDashboard::PutNumber("Right Output Offset", kDefaultOutputOffset);
+  frc::SmartDashboard::PutNumber("Right Deadband", kDefaultDeadband);
+  frc::SmartDashboard::PutNumber("Right Exponent", kDefaultExponent);
 }
 
 /**
@@ -70,6 +83,15 @@ void Robot::RobotPeriodic() {
     WritePoseToCSV();
   }
 
+  if (frc::SmartDashboard::GetBoolean("Update Conditioning", false)) {
+    m_jscLeft.SetRange(frc::SmartDashboard::PutNumber("Left Output Offset", kDefaultOutputOffset), 1.0);
+    m_jscLeft.SetDeadband(frc::SmartDashboard::PutNumber("Left Deadband", kDefaultDeadband));
+    m_jscLeft.SetExponent(frc::SmartDashboard::PutNumber("Left Exponent", kDefaultExponent));
+    m_jscLeft.SetRange(frc::SmartDashboard::PutNumber("Right Output Offset", kDefaultOutputOffset), 1.0);
+    m_jscLeft.SetDeadband(frc::SmartDashboard::PutNumber("Right Deadband", kDefaultDeadband));
+    m_jscLeft.SetExponent(frc::SmartDashboard::PutNumber("Right Exponent", kDefaultExponent));
+  }
+
   m_logData = logData;
 }
 
@@ -93,8 +115,8 @@ void Robot::TeleopInit() {}
 void Robot::TeleopPeriodic()
 {
   m_drivetrain.SetSpeeds(
-    m_jsc.Condition(m_driverJoystickLeft.GetY()),
-    m_jsc.Condition(m_driverJoystickRight.GetY())
+    m_jscLeft.Condition(m_driverJoystickLeft.GetY()),
+    m_jscRight.Condition(m_driverJoystickRight.GetY())
   );
 }
 
