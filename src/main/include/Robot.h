@@ -29,6 +29,8 @@ private:
   const std::string kCSVHeader = "Time,Pose2d::X,Pose2d::Y,Pose2d::Heading,Inputs::Left,Inputs::Right";
   std::string m_csvName = "/home/lvuser/pose_";
   bool m_headerWritten = false;
+  bool m_logData = false;
+  std::string m_driverName = "NoName";
   std::vector<std::tuple<int64_t, units::meter_t, units::meter_t, units::degree_t, double, double>> m_pose;
 
   Drivetrain m_drivetrain;

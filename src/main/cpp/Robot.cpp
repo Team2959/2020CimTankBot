@@ -6,6 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "Robot.h"
+#include <frc/smartdashboard/SmartDashboard.h>
 
 #include <iostream>
 #include <fstream>
@@ -18,18 +19,8 @@ void Robot::RobotInit()
   m_jsc.SetRange(0.05, 1.0);
   m_jsc.SetExponent(3.0);
 
-  int i;
-  for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good() && i < kMaxFiles; i++);
-  if (i >= kMaxFiles) {
-    i = 0;
-    std::ofstream ofs;
-    ofs.open(m_csvName + std::to_string(i) + ".csv", std::ofstream::out | std::ofstream::trunc);
-    ofs.close();
-  }
-  m_csvName = m_csvName + std::to_string(i) + ".csv";
-  if (std::ifstream{m_csvName + std::to_string(i+1) + ".csv"}.good()) {
-    remove((m_csvName + std::to_string(i+1) + ".csv").c_str());
-  }
+  frc::SmartDashboard::PutBoolean("Enable Logging", m_logData);
+  frc::SmartDashboard::PutString("Driver Name", m_driverName);
 }
 
 /**
@@ -42,17 +33,44 @@ void Robot::RobotInit()
  */
 void Robot::RobotPeriodic() {
   frc::Pose2d pose = m_drivetrain.UpdateOdometry();
-  auto inputs = m_drivetrain.GetInputs();
-  m_pose.push_back(std::make_tuple(
-    std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count(),
-    pose.Translation().X(),
-    pose.Translation().Y(),
-    pose.Rotation().Degrees(),
-    std::get<0>(inputs),
-    std::get<1>(inputs)
-  ));
 
-  if (m_pose.size() >= 100) WritePoseToCSV();
+  bool logData = frc::SmartDashboard::GetBoolean("Enable Logging", false);
+  if (logData && !m_logData) {
+    // Log Data rising edge begin logging data
+    // Get driver name and build csv file from it
+    m_driverName = frc::SmartDashboard::GetString("Driver Name", "NoName");
+    m_csvName = m_driverName + "_pose_";
+    int i;
+    for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good() && i < kMaxFiles; i++);
+    if (i >= kMaxFiles) {
+      i = 0;
+      std::ofstream ofs;
+      ofs.open(m_csvName + std::to_string(i) + ".csv", std::ofstream::out | std::ofstream::trunc);
+      ofs.close();
+    }
+    m_csvName = m_csvName + std::to_string(i) + ".csv";
+    if (std::ifstream{m_csvName + std::to_string(i+1) + ".csv"}.good()) {
+      remove((m_csvName + std::to_string(i+1) + ".csv").c_str());
+    }
+  } else if (logData && m_logData) {
+    // Continue logging data
+    auto inputs = m_drivetrain.GetInputs();
+    m_pose.push_back(std::make_tuple(
+      std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count(),
+      pose.Translation().X(),
+      pose.Translation().Y(),
+      pose.Rotation().Degrees(),
+      std::get<0>(inputs),
+      std::get<1>(inputs)
+    ));
+
+    if (m_pose.size() >= 100) WritePoseToCSV();
+  } else if (!logData && m_logData) {
+    // Log data falling edge, stop logging data
+    WritePoseToCSV();
+  }
+
+  m_logData = logData;
 }
 
 /**
