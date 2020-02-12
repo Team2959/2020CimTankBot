@@ -10,7 +10,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdio>
 
 #include <hal/cpp/fpga_clock.h>
 
@@ -46,28 +45,21 @@ void Robot::RobotInit()
  */
 void Robot::RobotPeriodic() {
   frc::Pose2d pose = m_drivetrain.UpdateOdometry();
+  auto inputs = m_drivetrain.GetInputs();
+  auto outputs = m_drivetrain.GetSpeeds();
 
   bool logData = frc::SmartDashboard::GetBoolean("Enable Logging", false);
   if (logData && !m_logData) {
     // Log Data rising edge begin logging data
     // Get driver name and build csv file from it
     m_driverName = frc::SmartDashboard::GetString("Driver Name", "NoName");
-    m_csvName = m_driverName + "_pose_";
+    m_csvName = kDirName + m_driverName + "_pose_";
     int i;
-    for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good() && i < kMaxFiles; i++);
-    if (i >= kMaxFiles) {
-      i = 0;
-      std::ofstream ofs;
-      ofs.open(m_csvName + std::to_string(i) + ".csv", std::ofstream::out | std::ofstream::trunc);
-      ofs.close();
-    }
+    for (i = 0; std::ifstream{m_csvName + std::to_string(i) + ".csv"}.good(); i++);
     m_csvName = m_csvName + std::to_string(i) + ".csv";
-    if (std::ifstream{m_csvName + std::to_string(i+1) + ".csv"}.good()) {
-      remove((m_csvName + std::to_string(i+1) + ".csv").c_str());
-    }
+    std::ofstream{m_csvName}.close();
   } else if (logData && m_logData) {
     // Continue logging data
-    auto inputs = m_drivetrain.GetInputs();
     m_pose.push_back(std::make_tuple(
       std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count(),
       pose.Translation().X(),
@@ -84,15 +76,18 @@ void Robot::RobotPeriodic() {
   }
 
   if (frc::SmartDashboard::GetBoolean("Update Conditioning", false)) {
-    m_jscLeft.SetRange(frc::SmartDashboard::PutNumber("Left Output Offset", kDefaultOutputOffset), 1.0);
-    m_jscLeft.SetDeadband(frc::SmartDashboard::PutNumber("Left Deadband", kDefaultDeadband));
-    m_jscLeft.SetExponent(frc::SmartDashboard::PutNumber("Left Exponent", kDefaultExponent));
-    m_jscLeft.SetRange(frc::SmartDashboard::PutNumber("Right Output Offset", kDefaultOutputOffset), 1.0);
-    m_jscLeft.SetDeadband(frc::SmartDashboard::PutNumber("Right Deadband", kDefaultDeadband));
-    m_jscLeft.SetExponent(frc::SmartDashboard::PutNumber("Right Exponent", kDefaultExponent));
+    m_jscLeft.SetRange(frc::SmartDashboard::GetNumber("Left Output Offset", kDefaultOutputOffset), 1.0);
+    m_jscLeft.SetDeadband(frc::SmartDashboard::GetNumber("Left Deadband", kDefaultDeadband));
+    m_jscLeft.SetExponent(frc::SmartDashboard::GetNumber("Left Exponent", kDefaultExponent));
+    m_jscRight.SetRange(frc::SmartDashboard::GetNumber("Right Output Offset", kDefaultOutputOffset), 1.0);
+    m_jscRight.SetDeadband(frc::SmartDashboard::GetNumber("Right Deadband", kDefaultDeadband));
+    m_jscRight.SetExponent(frc::SmartDashboard::GetNumber("Right Exponent", kDefaultExponent));
   }
 
   m_logData = logData;
+  //std::cout << std::get<0>(outputs) << ", " << std::get<1>(outputs) << std::endl;
+  frc::SmartDashboard::PutNumber("Left Output", std::get<0>(outputs));
+  frc::SmartDashboard::PutNumber("Right Output", std::get<1>(outputs));
 }
 
 /**
@@ -127,6 +122,7 @@ void Robot::WritePoseToCSV() {
   stream.open(m_csvName, std::fstream::app | std::fstream::out | std::fstream::in);
   if (!stream.is_open()) {
     std::cout << "Failed to write data to CSV file" << std::endl;
+    std::cout << m_csvName << std::endl;
   }
   if (!m_headerWritten) {
     stream << kCSVHeader << std::endl;
@@ -138,7 +134,7 @@ void Robot::WritePoseToCSV() {
       << std::to_string(double(std::get<1>(tuple))) << ","
       << std::to_string(double(std::get<2>(tuple))) << ","
       << std::to_string(double(std::get<3>(tuple))) << ","
-      << std::to_string(double(std::get<4>(tuple))) << "\n"
+      << std::to_string(double(std::get<4>(tuple))) << ","
       << std::to_string(double(std::get<5>(tuple))) << "\n";
   }
 

@@ -31,8 +31,9 @@ private:
   const double kDefaultExponent = 3.0;
 
   const int kMaxFiles = 5;
+  const std::string kDirName = "/home/lvuser/";
   const std::string kCSVHeader = "Time,Pose2d::X,Pose2d::Y,Pose2d::Heading,Inputs::Left,Inputs::Right";
-  std::string m_csvName = "/home/lvuser/pose_";
+  std::string m_csvName;
   bool m_headerWritten = false;
   bool m_logData = false;
   std::string m_driverName = "NoName";

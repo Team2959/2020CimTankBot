@@ -45,9 +45,9 @@ double cwtech::UniformConditioning::Condition(double x)
     double xa = std::abs(x);
     double xs = cwtech::JSCSgn(x);
     if (xa < m_deadband) {
-        return xs * m_min;
+        return 0;
     } else {
-        return xs * (cwtech::JSCPower((xa - m_deadband) * m_mult, m_power) * m_range) + m_min;
+        return xs * ((cwtech::JSCPower((xa - m_deadband) * m_mult, m_power) * m_range) + m_min);
     }
 }
 

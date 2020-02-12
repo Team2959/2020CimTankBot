@@ -9,8 +9,9 @@
 
 Drivetrain::Drivetrain() {
     m_gyro.Reset();
-    m_leftEncoder.SetDistancePerPulse(2 * wpi::math::pi * kWheelRadius / kEncoderResolution);
-    m_rightEncoder.SetDistancePerPulse(2 * wpi::math::pi * kWheelRadius / kEncoderResolution);
+    m_leftEncoder.SetDistancePerPulse((2.0 * wpi::math::pi * kWheelRadius) / kEncoderResolution);
+    m_rightEncoder.SetDistancePerPulse((2.0 * wpi::math::pi * kWheelRadius) / kEncoderResolution);
+    //std::cout << "Distance Per Pulse: " << m_leftEncoder.GetDistancePerPulse() << std::endl;
 
     m_leftEncoder.Reset();
     m_rightEncoder.Reset();
@@ -32,6 +33,10 @@ void Drivetrain::SetSpeeds(double leftSpeed, double rightSpeed) {
     m_tankDrive.TankDrive(leftSpeed, rightSpeed);
     m_leftSpeed = leftSpeed;
     m_rightSpeed = rightSpeed;
+}
+
+std::tuple<double, double> Drivetrain::GetSpeeds() {
+    return std::make_tuple(m_leftEncoder.GetRate(), m_rightEncoder.GetRate());
 }
 
 std::tuple<double, double> Drivetrain::GetInputs() {
